@@ -6,7 +6,7 @@
 
 Build voice agents, put them on phone numbers, place calls, steer them live, and read transcripts, all from your backend.
 
-[![PyPI](https://img.shields.io/pypi/v/dialgem?color=3775A9&logo=pypi&logoColor=white)](https://pypi.org/project/dialgem/)
+[![PyPI](https://img.shields.io/pypi/v/dialgem?color=3775A9&logo=pypi&logoColor=white)](https://pypi.org/project/dialgem/) 
 [![Python](https://img.shields.io/pypi/pyversions/dialgem?logo=python&logoColor=white)](https://pypi.org/project/dialgem/)
 [![CI](https://img.shields.io/github/actions/workflow/status/DialgemAI/dialgem-sdk-python/ci.yml?branch=main&label=CI&logo=github)](https://github.com/DialgemAI/dialgem-sdk-python/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
