@@ -1,0 +1,37 @@
+name: Release
+
+# Publishes to PyPI when a tag v<version> is pushed. Uses PyPI trusted publishing (no token stored):
+# configure the publisher at https://pypi.org/manage/account/publishing/ for this repo and workflow.
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Tag must be on main
+        run: |
+          git fetch origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: mypy src
+      - run: python scripts/unasync.py --check && python scripts/gen_params.py --check
+      - run: pytest
+      - name: Tag matches the package version
+        run: |
+          v=$(python -c "from dialgem import __version__ as v; print(v)")
+          test "v$v" = "${GITHUB_REF_NAME}" || { echo "tag ${GITHUB_REF_NAME} != package version v$v"; exit 1; }
+      - run: python -m build && twine check dist/*
+      - uses: pypa/gh-action-pypi-publish@release/v1

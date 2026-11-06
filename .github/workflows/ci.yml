@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: mypy src
+      - name: Generated files are current
+        run: |
+          python scripts/unasync.py --check
+          python scripts/gen_params.py --check
+      - run: pytest
+      - name: Mutation spot-check
+        if: matrix.python == '3.12'
+        run: python scripts/mutate.py
+      - name: Build and check the distribution
+        if: matrix.python == '3.12'
+        run: |
+          python -m build
+          twine check dist/*

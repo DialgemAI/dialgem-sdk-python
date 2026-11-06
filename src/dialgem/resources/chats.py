@@ -1,0 +1,99 @@
+"""Chats: text conversations with an agent."""
+
+from __future__ import annotations
+
+from typing import Any, Dict, Literal, Optional
+
+from typing_extensions import Unpack
+
+from dialgem._base_client import RequestOptions
+from dialgem._pagination import SyncPage
+from dialgem._resource import Resource, pid
+from dialgem.types.chat import Chat, ChatDeleteResponse, ChatReply
+from dialgem.types.params import ChatCreateParams
+
+
+class Chats(Resource):
+    """``dialgem.chats``: text conversations with one of your agents, from your backend.
+
+        chat = dialgem.chats.create(agent_id=agent.id, dynamic_variables={"customer": "Ada"})
+        reply = dialgem.chats.send_message(chat.id, "Can I come in on Tuesday?")
+        dialgem.chats.end(chat.id)
+
+    The agent is the one that answers your phone: same prompt, model and functions. Prompt agents only; an
+    agent that keeps no transcript cannot chat. Your API key stays on your server; to put a chat box on a
+    web page, have your backend call ``send_message`` for the visitor.
+    """
+
+    def create(self, *, request_options: Optional[RequestOptions] = None, **body: Unpack[ChatCreateParams]) -> Chat:
+        """Start a chat. If the agent has a first message it is already in ``messages``.
+
+        Raises ``UnprocessableEntityError`` with ``err_code`` ``agent_type_not_supported`` (flow agents)
+        or ``chat_requires_storage``. Not retried by default.
+        """
+        return self._client.post("/v1/chats", body=body, cast_to=Chat, options=request_options)
+
+    def list(
+        self,
+        *,
+        agent_id: Optional[str] = None,
+        status: Optional[Literal["ongoing", "ended"]] = None,
+        limit: int = 50,
+        request_options: Optional[RequestOptions] = None,
+    ) -> SyncPage[Chat]:
+        """Chats, newest first. Iterate the result to walk every page. Entries leave out ``messages``."""
+        query: Dict[str, Any] = {"agent_id": agent_id, "status": status, "limit": limit}
+        return self._client.paginate(
+            "/v1/chats",
+            query=query,
+            cast_to=Chat,
+            items_key="chats",
+            cursor_param="pagination_key",
+            next_key="pagination_key",
+            options=request_options,
+        )
+
+    def retrieve(self, chat_id: str, /, *, request_options: Optional[RequestOptions] = None) -> Chat:
+        """One chat with all its messages."""
+        return self._client.get(f"/v1/chats/{pid(chat_id)}", cast_to=Chat, options=request_options)
+
+    def update(
+        self, chat_id: str, /, *, metadata: Dict[str, Any], request_options: Optional[RequestOptions] = None
+    ) -> Chat:
+        """Replace the chat's ``metadata`` (the whole object)."""
+        return self._client.patch(
+            f"/v1/chats/{pid(chat_id)}", body={"metadata": metadata}, cast_to=Chat, options=request_options
+        )
+
+    def delete(self, chat_id: str, /, *, request_options: Optional[RequestOptions] = None) -> ChatDeleteResponse:
+        """Delete a chat and its messages."""
+        return self._client.delete(f"/v1/chats/{pid(chat_id)}", cast_to=ChatDeleteResponse, options=request_options)
+
+    def send_message(
+        self, chat_id: str, content: str, /, *, request_options: Optional[RequestOptions] = None
+    ) -> ChatReply:
+        """Send the user's message and wait for the agent's reply.
+
+        Returns only the new entries, in order: the user's message, any tool use, the agent's reply. If the
+        agent's model fails (``ServerError``, ``err_code`` ``model_error``) nothing is stored and the same
+        message can be sent again. ``ConflictError`` with ``err_code`` ``chat_busy`` while another reply is
+        in progress, ``chat_ended`` after the end, ``message_limit`` at the cap. If the agent calls its
+        end-call tool, ``chat_status`` is ``ended``.
+
+        This is a POST and is **not retried** on a failure: a retry could put the message in the chat twice.
+        """
+        return self._client.post(
+            f"/v1/chats/{pid(chat_id)}/messages", body={"content": content}, cast_to=ChatReply, options=request_options
+        )
+
+    def end(self, chat_id: str, /, *, request_options: Optional[RequestOptions] = None) -> Chat:
+        """End the chat. Ending twice is fine. The analysis arrives a moment later; read it with ``retrieve``."""
+        return self._client.post(f"/v1/chats/{pid(chat_id)}/end", cast_to=Chat, options=request_options)
+
+    def rerun_analysis(self, chat_id: str, /, *, request_options: Optional[RequestOptions] = None) -> Chat:
+        """Analyse an ended chat again with the agent's current analysis settings and return it.
+
+        ``ConflictError`` with ``err_code`` ``chat_in_progress`` until it has ended, ``no_transcript`` when
+        it has no messages.
+        """
+        return self._client.post(f"/v1/chats/{pid(chat_id)}/rerun-analysis", cast_to=Chat, options=request_options)
