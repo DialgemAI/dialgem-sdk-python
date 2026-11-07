@@ -9,3 +9,6 @@ build/
 .pytest_cache/
 .env
 .env.*
+
+# Local tool state
+.cr-track/
