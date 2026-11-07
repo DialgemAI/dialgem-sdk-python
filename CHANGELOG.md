@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0b2
+
+`phone_numbers.search(country=, type=, area_code=, contains=, limit=)` lists numbers that can be bought, with the monthly price, and `phone_numbers.buy(phone_number=, type=, nickname=)` buys one (sync and asyncio). **Buying spends the organization's credit**: the first month is debited when you buy and the rental renews monthly until the number is released; nothing is charged if the purchase fails. The deployment must have number purchasing switched on, or `search` raises `NotFoundError` (`number_purchase_disabled`). A number looked up with `phone_numbers.retrieve` now carries `own_twilio`. Connecting your own Twilio account and importing its numbers is a dashboard feature, not in the SDK, because it handles your Twilio credentials.
+
 ## 0.1.0b1 (unreleased)
 
 First release. Sync and asyncio clients covering the customer API: agents (functions, knowledge, MCP
