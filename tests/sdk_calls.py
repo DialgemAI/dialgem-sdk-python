@@ -67,6 +67,8 @@ SDK_CALLS = [
     SdkCall("calls.create_phone_call", lambda c: c.calls.create_phone_call(to="+14155550100", from_="+14155550101")),
     SdkCall("calls.register", lambda c: c.calls.register(call_id="CA1", agent_id=A, from_number="+1", to_number="+2")),
     SdkCall("phone_numbers.create", lambda c: c.phone_numbers.create(phone_number="+14155550100")),
+    SdkCall("phone_numbers.search", lambda c: c.phone_numbers.search(area_code="415")),
+    SdkCall("phone_numbers.buy", lambda c: c.phone_numbers.buy(phone_number="+14155550100")),
     SdkCall("phone_numbers.list", lambda c: c.phone_numbers.list()),
     SdkCall("phone_numbers.retrieve", lambda c: c.phone_numbers.retrieve("+14155550100")),
     SdkCall("phone_numbers.update", lambda c: c.phone_numbers.update(N, nickname="n")),

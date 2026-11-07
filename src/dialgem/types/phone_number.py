@@ -54,6 +54,35 @@ class PhoneNumber(DialgemModel):
     inbound_webhook_secret: Optional[str] = None
 
 
+class AvailablePhoneNumber(DialgemModel):
+    """A number that can be bought, from `phone_numbers.search`."""
+
+    #: E.164. Pass it to `phone_numbers.buy`.
+    phone_number: str
+    friendly_name: str
+    type: str
+    locality: Optional[str] = None
+    region: Optional[str] = None
+    country: str
+    voice: bool
+    sms: bool
+    mms: bool
+
+
+class AvailablePhoneNumbers(DialgemModel):
+    numbers: List[AvailablePhoneNumber]
+    #: The monthly rental, in 0.0001-dollar units (`monthly_price_usd * 10000`).
+    monthly_price_units: Number
+    monthly_price_usd: Number
+
+
+class PurchasedPhoneNumber(PhoneNumber):
+    """What `phone_numbers.buy` returns: the new number, plus its monthly price."""
+
+    monthly_price_units: Number
+    monthly_price_usd: Number
+
+
 class InboundWebhookTestResult(DialgemModel):
     """What `phoneNumbers.testInboundWebhook` reports."""
 

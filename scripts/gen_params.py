@@ -31,6 +31,7 @@ REQUESTS = [
     ("PhoneNumberCreateParams", "PhoneNumberCreate"),
     ("PhoneNumberUpdateParams", "PhoneNumberUpdate"),
     ("PhoneNumberAssignParams", "PhoneNumberAssign"),
+    ("PhoneNumberBuyParams", "BuyNumberRequest"),
     ("CallCreatePhoneCallParams", "OutboundCallRequest"),
     ("CallRegisterParams", "RegisterCallRequest"),
     ("ChatCreateParams", "ChatCreate"),

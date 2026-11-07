@@ -274,6 +274,13 @@ class PhoneNumberAssignParams(TypedDict, total=False):
     agent_id: Union[str, None]
     agent_version: Union[int, Literal['latest_published'], None]
 
+class PhoneNumberBuyParams(TypedDict, total=False):
+    """Body of the request. Schema: ``BuyNumberRequest``."""
+
+    phone_number: Required[str]
+    type: str
+    nickname: Union[str, None]
+
 class CallCreatePhoneCallParams(TypedDict, total=False):
     """Body of the request. Schema: ``OutboundCallRequest``."""
 

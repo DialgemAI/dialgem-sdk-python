@@ -8,8 +8,18 @@ from typing_extensions import Unpack
 
 from dialgem._base_client import RequestOptions
 from dialgem._resource import Resource, pid
-from dialgem.types.params import PhoneNumberAssignParams, PhoneNumberCreateParams, PhoneNumberUpdateParams
-from dialgem.types.phone_number import InboundWebhookTestResult, PhoneNumber
+from dialgem.types.params import (
+    PhoneNumberAssignParams,
+    PhoneNumberBuyParams,
+    PhoneNumberCreateParams,
+    PhoneNumberUpdateParams,
+)
+from dialgem.types.phone_number import (
+    AvailablePhoneNumbers,
+    InboundWebhookTestResult,
+    PhoneNumber,
+    PurchasedPhoneNumber,
+)
 
 
 class PhoneNumbers(Resource):
@@ -19,6 +29,35 @@ class PhoneNumbers(Resource):
         self, *, request_options: Optional[RequestOptions] = None, **body: Unpack[PhoneNumberCreateParams]
     ) -> PhoneNumber:
         return self._client.post("/v1/phone-numbers", body=body, cast_to=PhoneNumber, options=request_options)
+
+    def search(
+        self,
+        *,
+        country: Optional[str] = None,
+        type: Optional[str] = None,
+        area_code: Optional[str] = None,
+        contains: Optional[str] = None,
+        limit: Optional[int] = None,
+        request_options: Optional[RequestOptions] = None,
+    ) -> AvailablePhoneNumbers:
+        """Numbers that can be bought, with the monthly price.
+
+        ``type`` is ``"local"`` (default) or ``"toll_free"``; ``area_code`` is three digits. Raises
+        ``NotFoundError`` (``number_purchase_disabled``) when the deployment has not switched buying on.
+        """
+        query = {"country": country, "type": type, "area_code": area_code, "contains": contains, "limit": limit}
+        return self._client.get(
+            "/v1/phone-numbers/available", query=query, cast_to=AvailablePhoneNumbers, options=request_options
+        )
+
+    def buy(
+        self, *, request_options: Optional[RequestOptions] = None, **body: Unpack[PhoneNumberBuyParams]
+    ) -> PurchasedPhoneNumber:
+        """Buy one of the numbers ``search`` returned. **Spends the organization's credit**: the first month is
+        debited now and the rental renews monthly until the number is released. Nothing is charged if it fails."""
+        return self._client.post(
+            "/v1/phone-numbers/buy", body=body, cast_to=PurchasedPhoneNumber, options=request_options
+        )
 
     def list(self, *, request_options: Optional[RequestOptions] = None) -> List[PhoneNumber]:
         return self._client.get("/v1/phone-numbers", cast_to=List[PhoneNumber], options=request_options)
