@@ -237,7 +237,7 @@ python scripts/mutate.py        # mutation spot-check of the safety rules
 
 ## License
 
-Apache-2.0
+Apache-2.0. Copyright 2026 Achroweb Solutions. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
 ---
 

@@ -43,7 +43,7 @@ pattern = 'VERSION = "(?P<version>[^"]+)"'
 packages = ["src/dialgem"]
 
 [tool.hatch.build.targets.sdist]
-include = ["src", "README.md", "LICENSE", "CHANGELOG.md", "docs", "examples"]
+include = ["src", "README.md", "LICENSE", "NOTICE", "CHANGELOG.md", "docs", "examples"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
